@@ -2,7 +2,7 @@ import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterCont
 import { KHR_MATERIALS_CLEARCOAT } from '../constants.js';
 import { Clearcoat } from './clearcoat.js';
 
-interface ClearcoatDef {
+interface ClearcoatDef extends GLTF.IProperty {
 	clearcoatFactor?: number;
 	clearcoatRoughnessFactor?: number;
 	clearcoatTexture?: GLTF.ITextureInfo;
@@ -75,6 +75,10 @@ export class KHRMaterialsClearcoat extends Extension {
 
 				const clearcoatDef = materialDef.extensions[KHR_MATERIALS_CLEARCOAT] as ClearcoatDef;
 
+				if (clearcoatDef.extras) {
+					clearcoat.setExtras(clearcoatDef.extras);
+				}
+
 				// Factors.
 
 				if (clearcoatDef.clearcoatFactor !== undefined) {
@@ -125,14 +129,15 @@ export class KHRMaterialsClearcoat extends Extension {
 				if (clearcoat) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const clearcoatDef = context.createPropertyDef(clearcoat) as ClearcoatDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_CLEARCOAT] = clearcoatDef;
 
 					// Factors.
 
-					const clearcoatDef = (materialDef.extensions[KHR_MATERIALS_CLEARCOAT] = {
-						clearcoatFactor: clearcoat.getClearcoatFactor(),
-						clearcoatRoughnessFactor: clearcoat.getClearcoatRoughnessFactor(),
-					} as ClearcoatDef);
+					clearcoatDef.clearcoatFactor = clearcoat.getClearcoatFactor();
+					clearcoatDef.clearcoatRoughnessFactor = clearcoat.getClearcoatRoughnessFactor();
 
 					// Textures.
 

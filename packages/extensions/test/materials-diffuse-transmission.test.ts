@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { type DiffuseTransmission, KHRMaterialsDiffuseTransmission } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -75,4 +76,24 @@ test('copy', (t) => {
 	t.truthy(diffuseTransmission2, 'copy Transmission');
 	t.is(diffuseTransmission2.getDiffuseTransmissionFactor(), 0.9, 'copy transmissionFactor');
 	t.is(diffuseTransmission2.getDiffuseTransmissionTexture().getName(), 'trns', 'copy transmissionTexture');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsDiffuseTransmission]);
+
+	const diffuseTransmissionExtension = document.createExtension(KHRMaterialsDiffuseTransmission);
+	const diffuseTransmission = diffuseTransmissionExtension.createDiffuseTransmission().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_diffuse_transmission', diffuseTransmission);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<DiffuseTransmission>('KHR_materials_diffuse_transmission');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

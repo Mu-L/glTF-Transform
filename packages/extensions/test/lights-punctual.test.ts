@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { KHRLightsPunctual, Light } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -84,6 +85,9 @@ test('copy', (t) => {
 
 test('i/o', async (t) => {
 	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRLightsPunctual]);
+
 	const lightsExtension = document.createExtension(KHRLightsPunctual);
 	const light = lightsExtension.createLight().setType(Light.Type.POINT).setIntensity(2.0);
 
@@ -91,7 +95,7 @@ test('i/o', async (t) => {
 
 	t.is(node.getExtension('KHR_lights_punctual'), light, 'light is attached');
 
-	const jsonDoc = await new NodeIO().registerExtensions([KHRLightsPunctual]).writeJSON(document, WRITER_OPTIONS);
+	const jsonDoc = await io.writeJSON(document, WRITER_OPTIONS);
 	const nodeDef = jsonDoc.json.nodes[0];
 
 	t.deepEqual(nodeDef.extensions, { KHR_lights_punctual: { light: 0 } }, 'attaches light');
@@ -100,4 +104,27 @@ test('i/o', async (t) => {
 			lights: [{ type: 'point', intensity: 2 }], // omit range!
 		},
 	});
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRLightsPunctual]);
+
+	const lightsExtension = document.createExtension(KHRLightsPunctual);
+	const light = lightsExtension.createLight().setExtras({ hello: 'world' });
+
+	document.createNode().setExtension('KHR_lights_punctual', light);
+
+	const jsonDoc = await io.writeJSON(document, WRITER_OPTIONS);
+	const lightsExtensionDef = jsonDoc.json.extensions['KHR_lights_punctual'] as { lights: Record<string, unknown>[] };
+	const lightDef = lightsExtensionDef.lights[0];
+
+	t.deepEqual(lightDef.extras, { hello: 'world' }, 'writes light.extras');
+
+	const rtDocument = await io.readJSON(jsonDoc);
+	const rtLightsExtension = rtDocument.createExtension(KHRLightsPunctual);
+	const rtLight = rtLightsExtension.listProperties()[0] as Light;
+
+	t.deepEqual(rtLight.getExtras(), { hello: 'world' }, 'reads light.extras');
 });

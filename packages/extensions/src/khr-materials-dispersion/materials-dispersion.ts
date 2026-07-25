@@ -1,8 +1,8 @@
-import { Extension, PropertyType, type ReaderContext, type WriterContext } from '@gltf-transform/core';
+import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterContext } from '@gltf-transform/core';
 import { KHR_MATERIALS_DISPERSION } from '../constants.js';
 import { Dispersion } from './dispersion.js';
 
-interface DispersionDef {
+interface DispersionDef extends GLTF.IProperty {
 	dispersion?: number;
 }
 
@@ -69,6 +69,10 @@ export class KHRMaterialsDispersion extends Extension {
 
 				const dispersionDef = materialDef.extensions[KHR_MATERIALS_DISPERSION] as DispersionDef;
 
+				if (dispersionDef.extras) {
+					dispersion.setExtras(dispersionDef.extras);
+				}
+
 				// Factors.
 
 				if (dispersionDef.dispersion !== undefined) {
@@ -92,13 +96,14 @@ export class KHRMaterialsDispersion extends Extension {
 				if (dispersion) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const dispersionDef = context.createPropertyDef(dispersion) as DispersionDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_DISPERSION] = dispersionDef;
 
 					// Factors.
 
-					materialDef.extensions[KHR_MATERIALS_DISPERSION] = {
-						dispersion: dispersion.getDispersion(),
-					};
+					dispersionDef.dispersion = dispersion.getDispersion();
 				}
 			});
 

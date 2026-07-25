@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { KHRMaterialsSpecular, type Specular } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -72,4 +73,24 @@ test('copy', (t) => {
 	t.deepEqual(specular2.getSpecularColorFactor(), [0.9, 0.5, 0.8], 'copy specularColorFactor');
 	t.is(specular2.getSpecularTexture().getName(), 'spec', 'copy specularTexture');
 	t.is(specular2.getSpecularColorTexture().getName(), 'specColor', 'copy specularColorTexture');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsSpecular]);
+
+	const specularExtension = document.createExtension(KHRMaterialsSpecular);
+	const specular = specularExtension.createSpecular().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_specular', specular);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<Specular>('KHR_materials_specular');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

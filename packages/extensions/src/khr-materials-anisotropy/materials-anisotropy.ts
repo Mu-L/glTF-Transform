@@ -2,7 +2,7 @@ import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterCont
 import { KHR_MATERIALS_ANISOTROPY } from '../constants.js';
 import { Anisotropy } from './anisotropy.js';
 
-interface AnisotropyDef {
+interface AnisotropyDef extends GLTF.IProperty {
 	anisotropyStrength: number;
 	anisotropyRotation: number;
 	anisotropyTexture: GLTF.ITextureInfo;
@@ -82,6 +82,10 @@ export class KHRMaterialsAnisotropy extends Extension {
 
 				const anisotropyDef = materialDef.extensions[KHR_MATERIALS_ANISOTROPY] as AnisotropyDef;
 
+				if (anisotropyDef.extras) {
+					anisotropy.setExtras(anisotropyDef.extras);
+				}
+
 				// Factors.
 
 				if (anisotropyDef.anisotropyStrength !== undefined) {
@@ -117,11 +121,12 @@ export class KHRMaterialsAnisotropy extends Extension {
 				if (anisotropy) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const anisotropyDef = context.createPropertyDef(anisotropy) as AnisotropyDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_ANISOTROPY] = anisotropyDef;
 
 					// Factors.
-
-					const anisotropyDef = (materialDef.extensions[KHR_MATERIALS_ANISOTROPY] = {} as AnisotropyDef);
 
 					if (anisotropy.getAnisotropyStrength() > 0) {
 						anisotropyDef.anisotropyStrength = anisotropy.getAnisotropyStrength();

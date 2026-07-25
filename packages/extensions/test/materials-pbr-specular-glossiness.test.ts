@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { KHRMaterialsPBRSpecularGlossiness, type PBRSpecularGlossiness } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -78,4 +79,24 @@ test('copy', (t) => {
 	t.deepEqual(specGloss2.getSpecularFactor(), [0.9, 0.5, 0.8], 'copy specularFactor');
 	t.is(specGloss2.getGlossinessFactor(), 0.5, 'copy glossinessFactor');
 	t.is(specGloss2.getSpecularGlossinessTexture().getName(), 'specGloss', 'copy specularGlossinessTexture');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsPBRSpecularGlossiness]);
+
+	const specGlossExtension = document.createExtension(KHRMaterialsPBRSpecularGlossiness);
+	const specGloss = specGlossExtension.createPBRSpecularGlossiness().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_pbrSpecularGlossiness', specGloss);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<PBRSpecularGlossiness>('KHR_materials_pbrSpecularGlossiness');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

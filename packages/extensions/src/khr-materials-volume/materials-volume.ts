@@ -10,7 +10,7 @@ import {
 import { KHR_MATERIALS_VOLUME } from '../constants.js';
 import { Volume } from './volume.js';
 
-interface VolumeDef {
+interface VolumeDef extends GLTF.IProperty {
 	thicknessFactor?: number;
 	thicknessTexture?: GLTF.ITextureInfo;
 	attenuationDistance?: number;
@@ -102,6 +102,10 @@ export class KHRMaterialsVolume extends Extension {
 
 				const volumeDef = materialDef.extensions[KHR_MATERIALS_VOLUME] as VolumeDef;
 
+				if (volumeDef.extras) {
+					volume.setExtras(volumeDef.extras);
+				}
+
 				// Factors.
 
 				if (volumeDef.thicknessFactor !== undefined) {
@@ -140,11 +144,12 @@ export class KHRMaterialsVolume extends Extension {
 				if (volume) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const volumeDef = context.createPropertyDef(volume) as VolumeDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_VOLUME] = volumeDef;
 
 					// Factors.
-
-					const volumeDef = (materialDef.extensions[KHR_MATERIALS_VOLUME] = {} as VolumeDef);
 
 					if (volume.getThicknessFactor() > 0) {
 						volumeDef.thicknessFactor = volume.getThicknessFactor();

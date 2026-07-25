@@ -2,7 +2,7 @@ import { Extension, type GLTF, type ReaderContext, type vec3, type WriterContext
 import { KHR_MATERIALS_DIFFUSE_TRANSMISSION } from '../constants.js';
 import { DiffuseTransmission } from './diffuse-transmission.js';
 
-interface DiffuseTransmissionDef {
+interface DiffuseTransmissionDef extends GLTF.IProperty {
 	diffuseTransmissionFactor?: number;
 	diffuseTransmissionTexture?: GLTF.ITextureInfo;
 	diffuseTransmissionColorFactor?: vec3;
@@ -70,6 +70,10 @@ export class KHRMaterialsDiffuseTransmission extends Extension {
 					KHR_MATERIALS_DIFFUSE_TRANSMISSION
 				] as DiffuseTransmissionDef;
 
+				if (transmissionDef.extras) {
+					transmission.setExtras(transmissionDef.extras);
+				}
+
 				// Factors.
 
 				if (transmissionDef.diffuseTransmissionFactor !== undefined) {
@@ -111,14 +115,15 @@ export class KHRMaterialsDiffuseTransmission extends Extension {
 
 			const materialIndex = context.materialIndexMap.get(material)!;
 			const materialDef = jsonDoc.json.materials![materialIndex];
+			const transmissionDef = context.createPropertyDef(transmission) as DiffuseTransmissionDef;
+
 			materialDef.extensions = materialDef.extensions || {};
+			materialDef.extensions[KHR_MATERIALS_DIFFUSE_TRANSMISSION] = transmissionDef;
 
 			// Factors.
 
-			const transmissionDef = (materialDef.extensions[KHR_MATERIALS_DIFFUSE_TRANSMISSION] = {
-				diffuseTransmissionFactor: transmission.getDiffuseTransmissionFactor(),
-				diffuseTransmissionColorFactor: transmission.getDiffuseTransmissionColorFactor(),
-			} as DiffuseTransmissionDef);
+			transmissionDef.diffuseTransmissionFactor = transmission.getDiffuseTransmissionFactor();
+			transmissionDef.diffuseTransmissionColorFactor = transmission.getDiffuseTransmissionColorFactor();
 
 			// Textures.
 

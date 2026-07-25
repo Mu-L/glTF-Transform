@@ -10,7 +10,7 @@ import {
 import { KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS } from '../constants.js';
 import { PBRSpecularGlossiness } from './pbr-specular-glossiness.js';
 
-interface SpecularGlossinessDef {
+interface SpecularGlossinessDef extends GLTF.IProperty {
 	diffuseFactor?: vec4;
 	specularFactor: vec3;
 	glossinessFactor: number;
@@ -86,6 +86,10 @@ export class KHRMaterialsPBRSpecularGlossiness extends Extension {
 					KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS
 				] as SpecularGlossinessDef;
 
+				if (specGlossDef.extras) {
+					specGloss.setExtras(specGlossDef.extras);
+				}
+
 				// Factors.
 
 				if (specGlossDef.diffuseFactor !== undefined) {
@@ -130,15 +134,16 @@ export class KHRMaterialsPBRSpecularGlossiness extends Extension {
 				if (specGloss) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const specGlossDef = context.createPropertyDef(specGloss) as SpecularGlossinessDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS] = specGlossDef;
 
 					// Factors.
 
-					const specGlossDef = (materialDef.extensions[KHR_MATERIALS_PBR_SPECULAR_GLOSSINESS] = {
-						diffuseFactor: specGloss.getDiffuseFactor(),
-						specularFactor: specGloss.getSpecularFactor(),
-						glossinessFactor: specGloss.getGlossinessFactor(),
-					} as SpecularGlossinessDef);
+					specGlossDef.diffuseFactor = specGloss.getDiffuseFactor();
+					specGlossDef.specularFactor = specGloss.getSpecularFactor();
+					specGlossDef.glossinessFactor = specGloss.getGlossinessFactor();
 
 					// Textures.
 

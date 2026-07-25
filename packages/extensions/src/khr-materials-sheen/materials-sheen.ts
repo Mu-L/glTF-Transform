@@ -9,7 +9,7 @@ import {
 import { KHR_MATERIALS_SHEEN } from '../constants.js';
 import { Sheen } from './sheen.js';
 
-interface SheenDef {
+interface SheenDef extends GLTF.IProperty {
 	sheenColorFactor?: vec3;
 	sheenRoughnessFactor?: number;
 	sheenColorTexture?: GLTF.ITextureInfo;
@@ -84,6 +84,10 @@ export class KHRMaterialsSheen extends Extension {
 
 				const sheenDef = materialDef.extensions[KHR_MATERIALS_SHEEN] as SheenDef;
 
+				if (sheenDef.extras) {
+					sheen.setExtras(sheenDef.extras);
+				}
+
 				// Factors.
 
 				if (sheenDef.sheenColorFactor !== undefined) {
@@ -125,14 +129,15 @@ export class KHRMaterialsSheen extends Extension {
 				if (sheen) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const sheenDef = context.createPropertyDef(sheen) as SheenDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_SHEEN] = sheenDef;
 
 					// Factors.
 
-					const sheenDef = (materialDef.extensions[KHR_MATERIALS_SHEEN] = {
-						sheenColorFactor: sheen.getSheenColorFactor(),
-						sheenRoughnessFactor: sheen.getSheenRoughnessFactor(),
-					} as SheenDef);
+					sheenDef.sheenColorFactor = sheen.getSheenColorFactor();
+					sheenDef.sheenRoughnessFactor = sheen.getSheenRoughnessFactor();
 
 					// Textures.
 

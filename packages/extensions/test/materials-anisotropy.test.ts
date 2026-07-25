@@ -1,12 +1,16 @@
-import { Document, NodeIO } from '@gltf-transform/core';
+import { Document } from '@gltf-transform/core';
 import { type Anisotropy, KHRMaterialsAnisotropy } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
 
 test('factors', async (t) => {
 	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsAnisotropy]);
+
 	const anisotropyExtension = document.createExtension(KHRMaterialsAnisotropy);
 	const anisotropy = anisotropyExtension
 		.createAnisotropy()
@@ -18,7 +22,6 @@ test('factors', async (t) => {
 		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
 		.setExtension('KHR_materials_anisotropy', anisotropy);
 
-	const io = new NodeIO().registerExtensions([KHRMaterialsAnisotropy]);
 	const roundtripDoc = await io.readJSON(await io.writeJSON(document));
 	const roundtripMat = roundtripDoc.getRoot().listMaterials().pop();
 	const roundtripExt = roundtripMat.getExtension<Anisotropy>('KHR_materials_anisotropy');
@@ -29,6 +32,9 @@ test('factors', async (t) => {
 
 test('textures', async (t) => {
 	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsAnisotropy]);
+
 	document.createBuffer();
 	const anisotropyExtension = document.createExtension(KHRMaterialsAnisotropy);
 	const anisotropy = anisotropyExtension
@@ -44,7 +50,7 @@ test('textures', async (t) => {
 
 	t.is(material.getExtension('KHR_materials_anisotropy'), anisotropy, 'anisotropy is attached');
 
-	const jsonDoc = await new NodeIO().registerExtensions([KHRMaterialsAnisotropy]).writeJSON(document, WRITER_OPTIONS);
+	const jsonDoc = await io.writeJSON(document, WRITER_OPTIONS);
 	const materialDef = jsonDoc.json.materials[0];
 
 	t.deepEqual(materialDef.pbrMetallicRoughness.baseColorFactor, [1.0, 0.5, 0.5, 1.0], 'writes base color');
@@ -64,7 +70,7 @@ test('textures', async (t) => {
 	anisotropyExtension.dispose();
 	t.is(material.getExtension('KHR_materials_anisotropy'), null, 'anisotropy is detached');
 
-	const roundtripDoc = await new NodeIO().registerExtensions([KHRMaterialsAnisotropy]).readJSON(jsonDoc);
+	const roundtripDoc = await io.readJSON(jsonDoc);
 	const roundtripMat = roundtripDoc.getRoot().listMaterials().pop();
 	const roundtripExt = roundtripMat.getExtension<Anisotropy>('KHR_materials_anisotropy');
 
@@ -75,10 +81,12 @@ test('textures', async (t) => {
 
 test('disabled', async (t) => {
 	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsAnisotropy]);
+
 	document.createExtension(KHRMaterialsAnisotropy);
 	document.createMaterial();
 
-	const io = new NodeIO().registerExtensions([KHRMaterialsAnisotropy]);
 	const roundtripDoc = await io.readJSON(await io.writeJSON(document));
 	const roundtripMat = roundtripDoc.getRoot().listMaterials().pop();
 	t.is(roundtripMat.getExtension('KHR_materials_anisotropy'), null, 'no effect when not attached');
@@ -101,4 +109,24 @@ test('copy', (t) => {
 	t.is(anisotropy2.getAnisotropyStrength(), 0.9, 'copy anisotropyStrength');
 	t.is(anisotropy2.getAnisotropyRotation(), Math.PI / 3, 'copy anisotropyRotation');
 	t.is(anisotropy2.getAnisotropyTexture().getName(), 'ABC', 'copy anisotropyTexture');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsAnisotropy]);
+
+	const anisotropyExtension = document.createExtension(KHRMaterialsAnisotropy);
+	const anisotropy = anisotropyExtension.createAnisotropy().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_anisotropy', anisotropy);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<Anisotropy>('KHR_materials_anisotropy');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

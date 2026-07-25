@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { type Clearcoat, KHRMaterialsClearcoat } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -111,4 +112,24 @@ test('copy', (t) => {
 	t.is(clearcoat2.getClearcoatTexture().getName(), 'cc', 'copy clearcoatTexture');
 	t.is(clearcoat2.getClearcoatRoughnessTexture().getName(), 'ccrough', 'copy clearcoatRoughnessTexture');
 	t.is(clearcoat2.getClearcoatNormalTexture().getName(), 'ccnormal', 'copy clearcoatNormalTexture');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsClearcoat]);
+
+	const clearcoatExtension = document.createExtension(KHRMaterialsClearcoat);
+	const clearcoat = clearcoatExtension.createClearcoat().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_clearcoat', clearcoat);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<Clearcoat>('KHR_materials_clearcoat');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

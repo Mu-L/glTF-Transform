@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { KHRMaterialsVolume, type Volume } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -73,4 +74,24 @@ test('copy', (t) => {
 	t.is(volume2.getThicknessTexture().getName(), 'trns', 'copy thicknessTexture');
 	t.is(volume2.getAttenuationDistance(), 10, 'copy attenuationDistance');
 	t.deepEqual(volume2.getAttenuationColor(), [1, 0, 0], 'copy attenuationColor');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsVolume]);
+
+	const volumeExtension = document.createExtension(KHRMaterialsVolume);
+	const volume = volumeExtension.createVolume().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_volume', volume);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<Volume>('KHR_materials_volume');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

@@ -1,8 +1,8 @@
-import { Extension, PropertyType, type ReaderContext, type WriterContext } from '@gltf-transform/core';
+import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterContext } from '@gltf-transform/core';
 import { KHR_MATERIALS_IOR } from '../constants.js';
 import { IOR } from './ior.js';
 
-interface IORDef {
+interface IORDef extends GLTF.IProperty {
 	ior?: number;
 }
 
@@ -65,6 +65,10 @@ export class KHRMaterialsIOR extends Extension {
 
 				const iorDef = materialDef.extensions[KHR_MATERIALS_IOR] as IORDef;
 
+				if (iorDef.extras) {
+					ior.setExtras(iorDef.extras);
+				}
+
 				// Factors.
 
 				if (iorDef.ior !== undefined) {
@@ -88,13 +92,14 @@ export class KHRMaterialsIOR extends Extension {
 				if (ior) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const iorDef = context.createPropertyDef(ior) as IORDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_IOR] = iorDef;
 
 					// Factors.
 
-					materialDef.extensions[KHR_MATERIALS_IOR] = {
-						ior: ior.getIOR(),
-					};
+					iorDef.ior = ior.getIOR();
 				}
 			});
 

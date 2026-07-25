@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { type EmissiveStrength, KHRMaterialsEmissiveStrength } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -57,4 +58,24 @@ test('copy', (t) => {
 	t.is(doc2.getRoot().listExtensionsUsed().length, 1, 'copy KHRMaterialsEmissiveStrength');
 	t.truthy(emissiveStrength2, 'copy EmissiveStrength');
 	t.is(emissiveStrength2.getEmissiveStrength(), 5.0, 'copy emissive strength');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsEmissiveStrength]);
+
+	const emissiveStrengthExtension = document.createExtension(KHRMaterialsEmissiveStrength);
+	const emissiveStrength = emissiveStrengthExtension.createEmissiveStrength().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_emissive_strength', emissiveStrength);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<EmissiveStrength>('KHR_materials_emissive_strength');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

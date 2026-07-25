@@ -1,8 +1,8 @@
-import { Extension, PropertyType, type ReaderContext, type WriterContext } from '@gltf-transform/core';
+import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterContext } from '@gltf-transform/core';
 import { KHR_MATERIALS_EMISSIVE_STRENGTH } from '../constants.js';
 import { EmissiveStrength } from './emissive-strength.js';
 
-interface EmissiveStrengthDef {
+interface EmissiveStrengthDef extends GLTF.IProperty {
 	emissiveStrength?: number;
 }
 
@@ -84,6 +84,10 @@ export class KHRMaterialsEmissiveStrength extends Extension {
 					KHR_MATERIALS_EMISSIVE_STRENGTH
 				] as EmissiveStrengthDef;
 
+				if (emissiveStrengthDef.extras) {
+					emissiveStrength.setExtras(emissiveStrengthDef.extras);
+				}
+
 				// Factors.
 
 				if (emissiveStrengthDef.emissiveStrength !== undefined) {
@@ -107,13 +111,14 @@ export class KHRMaterialsEmissiveStrength extends Extension {
 				if (emissiveStrength) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const emissiveStrengthDef = context.createPropertyDef(emissiveStrength) as EmissiveStrengthDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_EMISSIVE_STRENGTH] = emissiveStrengthDef;
 
 					// Factors.
 
-					materialDef.extensions[KHR_MATERIALS_EMISSIVE_STRENGTH] = {
-						emissiveStrength: emissiveStrength.getEmissiveStrength(),
-					} as EmissiveStrengthDef;
+					emissiveStrengthDef.emissiveStrength = emissiveStrength.getEmissiveStrength();
 				}
 			});
 

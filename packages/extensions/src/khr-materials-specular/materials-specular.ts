@@ -10,7 +10,7 @@ import {
 import { KHR_MATERIALS_SPECULAR } from '../constants.js';
 import { Specular } from './specular.js';
 
-interface SpecularDef {
+interface SpecularDef extends GLTF.IProperty {
 	specularFactor?: number;
 	specularColorFactor?: vec3;
 	specularTexture?: GLTF.ITextureInfo;
@@ -81,6 +81,10 @@ export class KHRMaterialsSpecular extends Extension {
 
 				const specularDef = materialDef.extensions[KHR_MATERIALS_SPECULAR] as SpecularDef;
 
+				if (specularDef.extras) {
+					specular.setExtras(specularDef.extras);
+				}
+
 				// Factors.
 
 				if (specularDef.specularFactor !== undefined) {
@@ -122,11 +126,12 @@ export class KHRMaterialsSpecular extends Extension {
 				if (specular) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const specularDef = context.createPropertyDef(specular) as SpecularDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_SPECULAR] = specularDef;
 
 					// Factors.
-
-					const specularDef = (materialDef.extensions[KHR_MATERIALS_SPECULAR] = {} as SpecularDef);
 
 					if (specular.getSpecularFactor() !== 1) {
 						specularDef.specularFactor = specular.getSpecularFactor();

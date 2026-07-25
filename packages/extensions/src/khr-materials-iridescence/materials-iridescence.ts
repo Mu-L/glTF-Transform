@@ -2,7 +2,7 @@ import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterCont
 import { KHR_MATERIALS_IRIDESCENCE } from '../constants.js';
 import { Iridescence } from './iridescence.js';
 
-interface IridescenceDef {
+interface IridescenceDef extends GLTF.IProperty {
 	iridescenceFactor: number;
 	iridescenceTexture: GLTF.ITextureInfo;
 	iridescenceIor: number;
@@ -84,6 +84,10 @@ export class KHRMaterialsIridescence extends Extension {
 
 				const iridescenceDef = materialDef.extensions[KHR_MATERIALS_IRIDESCENCE] as IridescenceDef;
 
+				if (iridescenceDef.extras) {
+					iridescence.setExtras(iridescenceDef.extras);
+				}
+
 				// Factors.
 
 				if (iridescenceDef.iridescenceFactor !== undefined) {
@@ -131,11 +135,12 @@ export class KHRMaterialsIridescence extends Extension {
 				if (iridescence) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const iridescenceDef = context.createPropertyDef(iridescence) as IridescenceDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_IRIDESCENCE] = iridescenceDef;
 
 					// Factors.
-
-					const iridescenceDef = (materialDef.extensions[KHR_MATERIALS_IRIDESCENCE] = {} as IridescenceDef);
 
 					if (iridescence.getIridescenceFactor() > 0) {
 						iridescenceDef.iridescenceFactor = iridescence.getIridescenceFactor();

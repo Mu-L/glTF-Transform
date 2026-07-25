@@ -1,6 +1,7 @@
 import { Document, NodeIO } from '@gltf-transform/core';
 import { KHRMaterialsTransmission, type Transmission } from '@gltf-transform/extensions';
 import { cloneDocument } from '@gltf-transform/functions';
+import { createPlatformIO } from '@gltf-transform/test-utils';
 import test from 'ava';
 
 const WRITER_OPTIONS = { basename: 'extensionTest' };
@@ -63,4 +64,24 @@ test('copy', (t) => {
 	t.truthy(transmission2, 'copy Transmission');
 	t.is(transmission2.getTransmissionFactor(), 0.9, 'copy transmissionFactor');
 	t.is(transmission2.getTransmissionTexture().getName(), 'trns', 'copy transmissionTexture');
+});
+
+test('extras', async (t) => {
+	const document = new Document();
+	const io = await createPlatformIO();
+	io.registerExtensions([KHRMaterialsTransmission]);
+
+	const transmissionExtension = document.createExtension(KHRMaterialsTransmission);
+	const transmission = transmissionExtension.createTransmission().setExtras({ hello: 'world' });
+
+	document
+		.createMaterial('MyMaterial')
+		.setBaseColorFactor([1.0, 0.5, 0.5, 1.0])
+		.setExtension('KHR_materials_transmission', transmission);
+
+	const rtDocument = await io.readJSON(await io.writeJSON(document));
+	const rtMaterial = rtDocument.getRoot().listMaterials().pop();
+	const rtExtension = rtMaterial.getExtension<Transmission>('KHR_materials_transmission');
+
+	t.deepEqual(rtExtension.getExtras(), { hello: 'world' }, 'reads/writes extras');
 });

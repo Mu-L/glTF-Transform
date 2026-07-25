@@ -1,4 +1,11 @@
-import { Extension, MathUtils, type ReaderContext, type vec3, type WriterContext } from '@gltf-transform/core';
+import {
+	Extension,
+	type GLTF,
+	MathUtils,
+	type ReaderContext,
+	type vec3,
+	type WriterContext,
+} from '@gltf-transform/core';
 import { KHR_LIGHTS_PUNCTUAL } from '../constants.js';
 import { Light } from './light.js';
 
@@ -10,7 +17,7 @@ interface LightsPunctualNodeDef {
 	light: number;
 }
 
-interface LightDef {
+interface LightDef extends GLTF.IProperty {
 	name?: string;
 	color?: vec3;
 	intensity?: number;
@@ -73,6 +80,8 @@ export class KHRLightsPunctual extends Extension {
 				.setName(lightDef.name || '')
 				.setType(lightDef.type);
 
+			if (lightDef.extras) light.setExtras(lightDef.extras);
+
 			if (lightDef.color !== undefined) light.setColor(lightDef.color);
 			if (lightDef.intensity !== undefined) light.setIntensity(lightDef.intensity);
 			if (lightDef.range !== undefined) light.setRange(lightDef.range);
@@ -107,7 +116,9 @@ export class KHRLightsPunctual extends Extension {
 
 		for (const property of this.properties) {
 			const light = property as Light;
-			const lightDef = { type: light.getType() } as LightDef;
+			const lightDef = context.createPropertyDef(property) as LightDef;
+
+			lightDef.type = light.getType();
 
 			if (!MathUtils.eq(light.getColor(), [1, 1, 1])) lightDef.color = light.getColor();
 			if (light.getIntensity() !== 1) lightDef.intensity = light.getIntensity();

@@ -2,7 +2,7 @@ import { Extension, type GLTF, PropertyType, type ReaderContext, type WriterCont
 import { KHR_MATERIALS_TRANSMISSION } from '../constants.js';
 import { Transmission } from './transmission.js';
 
-interface TransmissionDef {
+interface TransmissionDef extends GLTF.IProperty {
 	transmissionFactor?: number;
 	transmissionTexture?: GLTF.ITextureInfo;
 }
@@ -77,6 +77,10 @@ export class KHRMaterialsTransmission extends Extension {
 
 				const transmissionDef = materialDef.extensions[KHR_MATERIALS_TRANSMISSION] as TransmissionDef;
 
+				if (transmissionDef.extras) {
+					transmission.setExtras(transmissionDef.extras);
+				}
+
 				// Factors.
 
 				if (transmissionDef.transmissionFactor !== undefined) {
@@ -109,13 +113,14 @@ export class KHRMaterialsTransmission extends Extension {
 				if (transmission) {
 					const materialIndex = context.materialIndexMap.get(material)!;
 					const materialDef = jsonDoc.json.materials![materialIndex];
+					const transmissionDef = context.createPropertyDef(transmission) as TransmissionDef;
+
 					materialDef.extensions = materialDef.extensions || {};
+					materialDef.extensions[KHR_MATERIALS_TRANSMISSION] = transmissionDef;
 
 					// Factors.
 
-					const transmissionDef = (materialDef.extensions[KHR_MATERIALS_TRANSMISSION] = {
-						transmissionFactor: transmission.getTransmissionFactor(),
-					} as TransmissionDef);
+					transmissionDef.transmissionFactor = transmission.getTransmissionFactor();
 
 					// Textures.
 
