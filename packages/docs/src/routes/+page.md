@@ -1,5 +1,4 @@
 <script context="module" lang="ts">
-import CommercialUse from '$lib/components/commercial-use.svelte';
 import License from '$lib/components/license.svelte';
 </script>
 
@@ -140,7 +139,5 @@ gltf-transform etc1s output1.glb output2.glb --quality 255 --verbose
 ```
 
 ... [and much more](/cli).
-
-<CommercialUse />
 
 <License />

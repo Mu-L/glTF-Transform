@@ -4,7 +4,6 @@ snippet: The glTF Transform project is developed and maintained by Don McCurdy. 
 ---
 
 <script context="module" lang="ts">
-import CommercialUse from '$lib/components/commercial-use.svelte';
 import License from '$lib/components/license.svelte';
 </script>
 
@@ -14,7 +13,5 @@ The glTF Transform project is developed and maintained by [Don McCurdy](https://
 
 - [Khronos Group](https://www.khronos.org/), for sponsoring development of [XMP metadata](/modules/extensions/classes/KHRXMP)
 - [Muse](https://www.muse.place/), for sponsoring development of [palette textures](/modules/functions/functions/palette)
-
-<CommercialUse />
 
 <License />

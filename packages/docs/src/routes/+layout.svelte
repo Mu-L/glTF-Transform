@@ -69,11 +69,6 @@ function toggleNav() {
 				</li>
 			{/each}
 		{/if}
-		<li>
-			<a class="greendoc-toolbar-pro-btn" target="_blank" href="https://gltf-transform.dev/pro" rel="noreferrer">
-				{#if innerWidth > 580}Get glTF Transform{/if} Pro 💎
-			</a>
-		</li>
 		{#if innerWidth <= LG}
 			<li class="greendoc-widget-item">
 				<button class="greendoc-widget menu no-caption" on:click={toggleNav}>Menu</button>

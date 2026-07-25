@@ -103,9 +103,8 @@ program
 	.description('Command-line interface (CLI) for the glTF Transform SDK.');
 
 if (process.argv && !process.argv.includes('--no-editorial')) {
-	program
-		.help(
-			`
+	program.help(
+		`
 To run the most common optimizations in one easy step, use the 'optimize' command:
 
 ▸ gltf-transform optimize <input> <output> --compress draco --texture-compress webp
@@ -121,21 +120,7 @@ and whether the scene is generally geometry-heavy, texture-heavy, has too many
 draw calls, etc. Apply individual commands below to deal with any of these
 issues as needed.
 `.trim(),
-		)
-		.help(
-			`
-${styleText('underline', 'Using glTF Transform for a personal project?')} That's great! Sponsorship is
-neither expected nor required. Feel free to share screenshots if you've
-made something you're excited about — I enjoy seeing those!
-
-${styleText('underline', 'Using glTF Transform in for-profit work?')} That's wonderful! Your support is
-important to keep glTF Transform maintained, independent, and open source under
-MIT License. Please consider a subscription or GitHub sponsorship.
-
-Learn more in the glTF Transform Pro FAQs (https://gltf-transform.dev/pro).
-`.trim(),
-			{ sectionName: 'COMMERCIAL USE' },
-		);
+	);
 }
 
 program.section('Inspect', '🔎');
