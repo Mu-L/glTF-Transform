@@ -34,7 +34,7 @@
     "@types/prompts": "^2.4.9",
     "@types/tmp": "~0.2.6",
     "cli-table3": "~0.6.5",
-    "csv-stringify": "~6.6.0",
+    "csv-stringify": "~6.8.1",
     "draco3dgltf": "~1.5.7",
     "gltf-validator": "~2.0.0-dev.3.10",
     "keyframe-resample": "~0.1.0",
@@ -46,8 +46,8 @@
     "mikktspace": "~1.1.1",
     "node-fetch": "~3.3.2",
     "prompts": "^2.4.2",
-    "sharp": "~0.34.5",
-    "tmp": "~0.2.5",
+    "sharp": "~0.35.3",
+    "tmp": "~0.2.7",
     "watlas": "^1.0.1"
   },
   "files": [
