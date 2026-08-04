@@ -636,7 +636,7 @@ __metadata:
     ktx-parse: "npm:^1.1.0"
     ndarray: "npm:^1.0.19"
     ndarray-lanczos: "npm:^0.3.0"
-    ndarray-pixels: "npm:^5.0.1"
+    ndarray-pixels: "npm:^5.2.0"
   languageName: unknown
   linkType: soft
 
@@ -6923,15 +6923,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ndarray-pixels@npm:^5.0.1":
-  version: 5.0.1
-  resolution: "ndarray-pixels@npm:5.0.1"
+"ndarray-pixels@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "ndarray-pixels@npm:5.2.0"
   dependencies:
     "@types/ndarray": "npm:^1.0.14"
     ndarray: "npm:^1.0.19"
     ndarray-ops: "npm:^1.2.2"
-    sharp: "npm:^0.34.0"
-  checksum: 10c0/3af8fdb6ce3f3e90e74653b5820eb6f0e83e84c573829e53e32fff924e7e5f5a2a37f896ad5fb9f5a5df223f230ffd873f187faee4ff96fc2ba2a6495d4cd132
+    sharp: "npm:^0.35.0"
+  checksum: 10c0/06176c2f2161f0df98b615953092cead893eab0563d19a70785715ac6e6c37c7f7a1b208a54efe06911934e508f6bae17a47e8c9b6b0d873e155e819f1300284
   languageName: node
   linkType: hard
 
