@@ -2,7 +2,7 @@
 
 [![Latest NPM release](https://img.shields.io/npm/v/@gltf-transform/core.svg)](https://www.npmjs.com/package/@gltf-transform/core)
 [![License](https://img.shields.io/badge/license-MIT-007ec6.svg)](https://github.com/donmccurdy/glTF-Transform/blob/main/LICENSE.md)
-[![Build Status](https://github.com/donmccurdy/glTF-Transform/workflows/build/badge.svg)](https://github.com/donmccurdy/glTF-Transform/actions?query=workflow%3Abuild)
+[![Build Status](https://github.com/donmccurdy/glTF-Transform/actions/workflows/ci.yml/badge.svg)](https://github.com/donmccurdy/glTF-Transform/actions?query=workflow%3Abuild+branch%3Amain)
 [![Coverage](https://codecov.io/gh/donmccurdy/glTF-Transform/branch/main/graph/badge.svg?token=Z91ZYFEV09)](https://codecov.io/gh/donmccurdy/glTF-Transform)
 
 *glTF 2.0 SDK for JavaScript and TypeScript, on Web and Node.js.*
