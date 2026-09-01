@@ -2,7 +2,21 @@
 
 ## v4.x
 
-### v4.5 (🚧 Unreleased)
+### v4.6 (🚧 Unreleased)
+
+### v4.5
+
+**Features:**
+
+ - feat(cli): Update KTX Software dependency to v4.4 [#1840](https://github.com/donmccurdy/glTF-Transform/pull/1840)
+
+**Other:**
+
+- fix(functions): Fix `palette()` preserving existing UVs [#1847](https://github.com/donmccurdy/glTF-Transform/pull/1847)
+- fix(functions): Fix vertex count on primitives with no vertex attributes [#1848](https://github.com/donmccurdy/glTF-Transform/pull/1848)
+- chore(repo): Add separate type check step to build [#1850](https://github.com/donmccurdy/glTF-Transform/pull/1850)
+- chore(repo): Migrate tests to `node:test` [#1851](https://github.com/donmccurdy/glTF-Transform/pull/1851)
+- chore(repo): Update dependencies [#1844](https://github.com/donmccurdy/glTF-Transform/pull/1844) [#1843](https://github.com/donmccurdy/glTF-Transform/pull/1843) [#1839](https://github.com/donmccurdy/glTF-Transform/pull/1839) [#1838](https://github.com/donmccurdy/glTF-Transform/pull/1838)
 
 ### v4.4
 
